@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development node ./src/index.js",
     "start": "cross-env NODE_ENV=production node ./src/index.js",
-    "load": "node ./src/seed/loadTasks.js"
+    "load": "cross-env NODE_ENV=development node ./src/seed/loadTasks.js"
   },
   "keywords": [],
   "author": "Antonio Navarro",

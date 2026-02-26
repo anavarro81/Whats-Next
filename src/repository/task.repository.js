@@ -1,5 +1,7 @@
 import { getDB } from "../bd.js";
 import { newLabel } from "../repository/label.respository.js";
+import * as tasksRepository from "../repository/task.repository.js";
+
 export const deleteTask = async (id) => {
   try {
     const db = await getDB();
@@ -43,12 +45,14 @@ export const getTasks = async (order) => {
         .toArray();
 
       return task;
+
     case "asc":
       task = await tasksCollection
         .find({ dueDate: { $exists: true } })
         .sort({ dueDate: 1 })
         .toArray();
-
+    case "today":
+      task = await tasksRepository.getTodayTasks();
       return task;
     default:
       console.error("orden no valido ");
@@ -68,6 +72,7 @@ export const getTodayTasks = async () => {
     const todayTask = await tasksCollection
       .find({ dueDate: { $gte: today, $lte: endOfDay } })
       .toArray();
+
     return todayTask;
   } catch (error) {
     console.error("error al obtener tareas de hoy ", error);

@@ -1,80 +1,54 @@
 export const taskData = [
   {
-    name: "Responder correos urgentes",
-    description: "Revisar la bandeja de entrada y contestar clientes",
-    label: "Trabajo",
-    proyect: "Proyecto 1",
-    dueDate: new Date(),
-    priority: "Alta"
+    taskName: "Comprar el pan",
+    timeBlock: "M",
+    date: "2026-02-03"
   },
   {
-    name: "Regar las plantas",
-    description: "Añadir fertilizante a las del salón",
-    label: "Casa",
-    proyect: "Proyecto 3",
-    dueDate: "2026-02-03",
-    priority: "Baja"
+    taskName: "Ir al gimnasio",
+    timeBlock: "M",
+    date: "2026-02-18"
   },
   {
-    name: "Llamar al banco",
-    description: null,
-    label: "Gestiones",
-    proyect: "Proyecto 2",
-    priority: "Media"
+    taskName: "Reunión de equipo",
+    timeBlock: "M",
+    date: "2026-02-18"
   },
   {
-    name: "Actualizar repositorio",
-    description: "Subir los últimos cambios del módulo de login",
-    label: "5_minutos",
-    proyect: "Proyecto 1",
-    dueDate: new Date(),
-    priority: "Alta"
+    taskName: "Almuerzo con el cliente",
+    timeBlock: "T",
+    date: "2026-02-18"
   },
   {
-    name: "Comprar suministros",
-    description: "Papelería y cartuchos de tinta",
-    label: "Gestiones",
-    proyect: "Proyecto 2",
-    dueDate: "2026-02-10",
-    priority: null
+    taskName: "Llevar el coche a revisión",
+    timeBlock: "T",
+    date: "2026-02-19"
   },
   {
-    name: "Limpiar el escritorio",
-    description: "Organizar cables y papeles",
-    label: "5_minutos",
-    proyect: "Proyecto 3",
-    priority: "Baja"
+    taskName: "Clase de yoga",
+    timeBlock: "N",
+    date: "2026-02-19"
   },
   {
-    name: "Reunión de planificación",
-    description: "Definir objetivos del próximo sprint",
-    label: "Trabajo",
-    proyect: "Proyecto 1",
-    dueDate: new Date(),
-    priority: "Alta"
+    taskName: "Preparar cena especial",
+    timeBlock: "N",
+    date: "2026-02-20"
   },
   {
-    name: "Pagar facturas",
-    description: null,
-    label: "Gestiones",
-    proyect: "Proyecto 2",
-    dueDate: "2026-02-04",
-    priority: "Media"
+    taskName: "Revisar correos pendientes",
+    timeBlock: "M",
+    date: "2026-02-21"
   },
   {
-    name: "Cenar con el equipo",
-    description: "Celebración fin de fase",
-    label: "Trabajo",
-    proyect: "Proyecto 3",
-    dueDate: new Date(),
-    priority: null
+    taskName: "Hacer la compra semanal",
+    timeBlock: "T",
+    date: "2026-02-21"
   },
   {
-    name: "Arreglar estantería",
-    description: "Ajustar los tornillos de la base",
-    label: "Casa",
-    proyect: "Proyecto 2",
-    priority: "Baja"
+    taskName: "Sesión de lectura",
+    timeBlock: "N",
+    date: "2026-02-21"
   }
+
 ];
 

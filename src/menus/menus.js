@@ -11,66 +11,15 @@ const runTaskQuestions = [
   { name: "Random", value: "random" },
   { name: "Descending", value: "desc" },
   { name: "Ascending", value: "asc" },
+  { name: "Tareas de hoy", value: "today" },
 ];
 
-export const createTaskQuesitons = [
-  {
-    type: "input",
-    name: "taskName",
-    message: "Ingrese nombre de tarea",
-    validate: (taskName) =>
-      taskName.trim() ? true : "Nombre de tarea obligatorio",
-  },
-
-  {
-    type: "input",
-    name: "description",
-    message: "Ingrese descripcion de tarea",
-  },
-  {
-    type: "input",
-    name: "dueDate",
-    message: "Ingrese fecha de vencimiento de tarea",
-  },
-  {
-    type: "rawlist",
-    name: "priority",
-    message: "Introduce el prioridad de la tarea (alta, media, baja):",
-    choices: [
-      { name: "Alta", value: "alta" },
-      { name: "Media", value: "media" },
-      { name: "Baja", value: "baja" },
-    ],
-  },
-
-  {
-    type: "list",
-    name: "confirmLabel",
-    message: "¿Quieres agregar una etiqueta a la tarea?",
-    choices: [
-      { name: "Sí", value: true },
-      { name: "No", value: false },
-    ],
-    default: 1,
-  },
-
-  {
-    type: "rawlist",
-    name: "label",
-    message: "Selecciona una etiqueta: ",
-    choices: [
-      { name: "5 minutos", value: "5_minutos" },
-      { name: "calle", value: "calle" },
-      { name: "mañana", value: "manana" },
-    ],
-  },
-
-  {
-    type: "input",
-    name: "project",
-    message: "Ingrese el proyecto asociado a la tarea:",
-  },
-];
+const postponeOptionsChoices = [
+  {name: "Mañana (24h)", value: 24},
+  {name: "Pasado mañana (48h)", value: 48},
+  {name: "Próxima semana", value: 7},
+  {name: "Próxima mes", value: 1},
+]
 
 export const mainMenu = async () => {
   const data = await inquirer.prompt([
@@ -96,10 +45,21 @@ export const runTaskMenu = async () => {
   return data;
 };
 
+// Obtener datos la tarea en formato:
+// - "Nombre de la tarea"
+// - Bloque:
+//   M = Mañana [9-14]
+//   T = Mañana [14-20]
+//   N - Noche [> 20h]
+//   Fecha en formado DD/MM
+
 export const newTaskMenu = async () => {
-  // Obtener datos de nueva tarea
-  const data = await inquirer.prompt(createTaskQuesitons);
-  return data;
+  const task = await inquirer.prompt({
+    type: "input",
+    name: "task",
+    message: "Introduce la tarea en formato tasknName -[M/T/N] DD/MM",
+  });
+  return task;
 };
 
 export const runTaskOneByOneMenu = async (tasks) => {
@@ -118,12 +78,26 @@ export const runTaskOneByOneMenu = async (tasks) => {
           value: "completedExit",
         },
         {
+          name: "No, la quiero postponer`,",
+          value: "postpone",
+        },
+        {
           name: "Salir`,",
           value: "exit",
         },
       ],
     },
+
+    {
+      type: "list",
+      name: "postponeAmount",
+      message: "¿Cuánto tiempo deseas posponerla?",
+      choices: postponeOptionsChoices,
+      when: (answers) => answers.opc === "postpone",
+    },
   ]);
+
+  console.log (data)
 
   return data.opc;
 };
@@ -131,7 +105,7 @@ export const runTaskOneByOneMenu = async (tasks) => {
 export const todayTaskMenu = async (todayTask) => {
   const opcSalir = [{ name: "Salir", value: "exit" }];
 
-  console.table(todayTask, ["name", "description"]);
+  console.table(todayTask, ["taskName", "timeBlock", "dueDate"]);
 
   // '\b\b' `Tarea #${i + 1}:`, todayTask[i].name + '\n' + "Descripcion: " + todayTask[i].description
 
@@ -145,26 +119,4 @@ export const todayTaskMenu = async (todayTask) => {
   ]);
 
   return data.opc;
-};
-
-export const showLabelsMenu = async (labels) => {
-
-    let labelChoices = []
-
-    for (const label of labels) {
-
-      let labelChoice = {name: label, value: label}
-      labelChoices.append(labelChoice)
-
-    }
-
-    console.log()
-  
-    const data = await inquirer.prompt({
-      type: "rawlist",
-      name: "label",
-      message: "Selecciona una etiqueta",
-      choices: labels,
-    });
-    return data.label
 };

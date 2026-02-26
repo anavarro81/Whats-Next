@@ -23,14 +23,3 @@ export const newLabel = async (label) => {
   }
 };
 
-export const getLabels = async () => {
-  try {
-
-     const db = getDB() 
-     const labels = await db.collection('labels').find({}).toArray()
-     return labels
-
-  } catch {
-    console.error('error al recuperar los labels')
-  }
-};
