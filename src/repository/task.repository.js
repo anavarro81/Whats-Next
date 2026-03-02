@@ -1,5 +1,5 @@
 import { getDB } from "../bd.js";
-import { newLabel } from "../repository/label.respository.js";
+
 import * as tasksRepository from "../repository/task.repository.js";
 
 export const deleteTask = async (id) => {
@@ -7,25 +7,6 @@ export const deleteTask = async (id) => {
     const db = await getDB();
     await db.collection("tasks").deleteOne({ _id: id });
   } catch (error) {}
-};
-
-export const insertTask = async (data) => {
-  try {
-    const currentDate = new Date();
-    const db = await getDB();
-
-    if (data.confirmLabel) {
-      await newLabel(data.label);
-    }
-
-    const task = await db
-      .collection("tasks")
-      .insertOne({ ...data, createdAt: currentDate });
-
-    return;
-  } catch (error) {
-    console.error("error al insertar la tarea ", error);
-  }
 };
 
 export const getTasks = async (order) => {
@@ -70,7 +51,7 @@ export const getTodayTasks = async () => {
     endOfDay.setHours(23, 59, 59, 999);
 
     const todayTask = await tasksCollection
-      .find({ dueDate: { $gte: today, $lte: endOfDay } })
+      .find({ dueDate: { $lte: today, $lte: endOfDay } })
       .toArray();
 
     return todayTask;
@@ -81,8 +62,6 @@ export const getTodayTasks = async () => {
 
 export const getTaskBylabel = async (label) => {
   try {
-    const db = await getDB();
-    const tasksCollection = db.collection("tasks");
     const tasks = await tasksCollection.find({ label }).toArray();
 
     if (tasks.length == 0) {
@@ -95,3 +74,31 @@ export const getTaskBylabel = async (label) => {
     console.log("error al recuperar las tares ", error);
   }
 };
+
+export const updateDueDate = async (postponeAmount) => {
+  const db = await getDB();
+  const tasksCollection = db.collection("tasks");
+  const task = await tasksCollection.updateOne();
+};
+
+export const insertTask = async (taskData) => {
+  try {
+    const db = await getDB();
+    const tasksCollection = db.collection("tasks");
+    await tasksCollection.insertOne(taskData);
+    console.log("tarea insertada correctamente");
+  } catch (error) {
+    console.error("error al insertar tarea ", error);
+  }
+};
+
+
+export const insertRecurringTask = async (taskData) => {
+  try {
+    const db = await getDB();
+    const tasksCollection = db.collection("recurringTasks");
+    await tasksCollection.insertOne(taskData);
+  } catch (error) {
+    console.error("error al insertar tarea recurrente ", error);
+  }
+};  

@@ -15,11 +15,11 @@ const runTaskQuestions = [
 ];
 
 const postponeOptionsChoices = [
-  {name: "Mañana (24h)", value: 24},
-  {name: "Pasado mañana (48h)", value: 48},
-  {name: "Próxima semana", value: 7},
-  {name: "Próxima mes", value: 1},
-]
+  { name: "Mañana (24h)", value: 24 },
+  { name: "Pasado mañana (48h)", value: 48 },
+  { name: "Próxima semana", value: 7 },
+  { name: "Próxima mes", value: 1 },
+];
 
 export const mainMenu = async () => {
   const data = await inquirer.prompt([
@@ -54,11 +54,34 @@ export const runTaskMenu = async () => {
 //   Fecha en formado DD/MM
 
 export const newTaskMenu = async () => {
-  const task = await inquirer.prompt({
-    type: "input",
-    name: "task",
-    message: "Introduce la tarea en formato tasknName -[M/T/N] DD/MM",
-  });
+  const task = await inquirer.prompt([
+    {
+      type: "input",
+      name: "name",
+      message:
+        "Introduce la tarea en formato tasknName -[M/T/N] DD/MM -R (Recurrente)",
+    },
+    // interval - cada cuanto se repite la tarea, solo si es recurrente
+    {
+      type: "input",
+      name: "interval",
+      message: "¿Cada cuanto se ejecutará? ",
+      when: (answers) => answers.name.includes("-R"),
+    },
+    {
+      type: "rawlist",
+      name: "unit",
+      message: "¿Cuál es la periodicidad de la tarea recurrente? ",
+      choices: [
+        { name: "Diaria", value: "day" },
+        { name: "Semanal", value: "week" },
+        { name: "Mensual", value: "month" },
+        { name: "Anual", value: "year" },
+      ],
+      when: (answers) => answers.name.includes("-R"),
+    },
+  ]);
+  console.log("Tarea introducida: ", task);
   return task;
 };
 
@@ -89,7 +112,7 @@ export const runTaskOneByOneMenu = async (tasks) => {
     },
 
     {
-      type: "list",
+      type: "rawlist",
       name: "postponeAmount",
       message: "¿Cuánto tiempo deseas posponerla?",
       choices: postponeOptionsChoices,
@@ -97,7 +120,7 @@ export const runTaskOneByOneMenu = async (tasks) => {
     },
   ]);
 
-  console.log (data)
+  console.log(data);
 
   return data.opc;
 };

@@ -1,33 +1,37 @@
 import * as tasksRepository from "../repository/task.repository.js";
+import daysjs from "dayjs";
+
 import {
   runTaskMenu,
   runTaskOneByOneMenu,
   todayTaskMenu,
 } from "../menus/menus.js";
 
-export const validateTaskFormat = (data) => {
+export const validatetaskData = (data) => {
+  let validFormat = false;
+  let recurringTask = false;
+
   const taskData = {
-    validFormat: false,
     taskName: "",
     timeBlock: "",
     dueDate: "",
     recurring: false,
-    periodity: "",
+    interval: 0,
+    unit: "",
   };
 
   // Extraigo el nombre de la tarea
-  const taskName = data.task.match(/"([^"]+)"/);
-  console.log("data ", data.task);
+  const taskName = data.name.match(/"([^"]+)"/);
 
   if (taskName) {
     taskData.taskName = taskName[1];
   } else {
-    console.error("tarea no valida");
-    return taskData;
+    console.error("Nombre de tarea no valido");
+    return { validFormat: false, taskData: null };
   }
 
-  // Extraigo el bloque de tiempo -M (mañana), -T(Tarde) o -N (Noche)
-  const timeBlock = data.task.match(/-([MTN])/);
+  // Extraigo el bloque de tiempo @M (mañana), @T(Tarde) o @N (Noche)
+  const timeBlock = data.name.match(/@([MTN])/);
 
   if (timeBlock) {
     console.log("timeBlock: ", timeBlock[1]);
@@ -35,7 +39,7 @@ export const validateTaskFormat = (data) => {
   }
 
   // Extraigo la fecha (si existe)
-  const date = data.task.match(/(\d{2}\/\d{2})/);
+  const date = data.name.match(/(\d{2}\/\d{2})/);
 
   if (date) {
     //2026-02-20T00:00:00Z
@@ -51,33 +55,46 @@ export const validateTaskFormat = (data) => {
     taskData.dueDate = new Date(dueDateStr);
   }
 
-  // El flag para taras recurrentes es: R-X donde X es la periodicidad -D(diaria), -W(Semanal)...
-
-  const recurringTask = data.task.match(/\bR-(?:D|W|M|A)\b/);
-
-  if (recurringTask) {
-    const periodity = recurringTask.slice(1, 2);
-    taskData.recurring = true;
-    taskData.periodity = periodity;
+  if (data.interval > 0 && data.unit) {
+    recurringTask = true;
+    taskData.interval = data.interval;
+    taskData.unit = data.unit;
   }
 
-  taskData.validFormat = true;
-  return taskData;
+  validFormat = true;
+  return {
+    validFormat: validFormat,
+    taskData: taskData,
+    recurringTask: recurringTask,
+  };
 };
 
 export const createNewTask = async (data) => {
   try {
-    const taskData = validateTaskFormat(data);
+    const { validFormat, taskData, recurringTask } = validatetaskData(data);
 
-    if (taskData.validFormat) {
+    if (validFormat) {
       console.log("datos tarea correctos");
     } else {
       console.error("datos tarea incorrectos");
+      return;
     }
 
     console.log("insertar datos ", taskData);
 
     await tasksRepository.insertTask(taskData);
+
+    if (recurringTask) {
+      const { taskName, interval, unit } = taskData;
+      const nextOccurrence = daysjs(new Date()).add(interval, 'year').toDate();
+      console.log("siguiente ocurrencia: ", nextOccurrence);
+      await tasksRepository.insertRecurringTask({
+        taskName,
+        interval,
+        unit,
+        nextOccurrence,
+      });
+    }
 
     return;
   } catch (error) {
@@ -104,10 +121,9 @@ export const runTasks = async () => {
   let opc = "";
 
   if (tasks.length == 0) {
-    console.error('No existen tareas')
-    return
+    console.error("No existen tareas");
+    return;
   }
-
 
   opc = await runTaskOneByOneMenu(tasks);
 
@@ -129,6 +145,12 @@ export const runTasks = async () => {
 
       case "completedExit":
         await tasksRepository.deleteTask(tasks[0]._id);
+        tasks.shift();
+        exit = "S";
+        break;
+
+      case "postpone":
+        await tasksRepository.update;
         tasks.shift();
         exit = "S";
         break;
