@@ -86,7 +86,7 @@ export const createNewTask = async (data) => {
 
     if (recurringTask) {
       const { taskName, interval, unit } = taskData;
-      const nextOccurrence = daysjs(new Date()).add(interval, 'year').toDate();
+      const nextOccurrence = daysjs(new Date()).add(interval, unit).toDate();
       console.log("siguiente ocurrencia: ", nextOccurrence);
       await tasksRepository.insertRecurringTask({
         taskName,
