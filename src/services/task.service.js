@@ -32,9 +32,6 @@ export const validatetaskData = (data) => {
     taskName: "",
     timeBlock: "",
     dueDate: null,
-    recurring: false,
-    interval: 0,
-    unit: "",
   };
 
   // Extraigo el nombre de la tarea
@@ -138,14 +135,12 @@ export const runTasks = async () => {
 
   const tasks = await getTasksToRun(order);
 
-  
-
   if (tasks.length == 0) {
     console.error("No existen tareas");
     return;
   }
 
-  const {opc, postponeAmount}= await runTaskOneByOneMenu(tasks);
+  const { opc, postponeAmount } = await runTaskOneByOneMenu(tasks);
 
   let exit = "N";
 
@@ -190,7 +185,7 @@ export const getTodayTask = async () => {
     if (todayTask.length > 0) {
       let opc = await todayTaskMenu(todayTask);
 
-      while (opc != "exit") {
+      while (opc != "EXIT") {
         opc = await todayTaskMenu(todayTask);
       }
 
@@ -223,7 +218,6 @@ export const getTaskBylabel = async (label) => {
   }
 };
 
-
 /* Recupera las tareas  recurrente con fecha anterior o igual a hoy */
 
 export const getRecurringTask = async () => {
@@ -244,14 +238,16 @@ export const getRecurringTask = async () => {
 export const loadRecurringTask = async () => {
   try {
     const recurringTasks = await getRecurringTask();
-    for (const recurringTask of recurringTasks) {      
-      
+    for (const recurringTask of recurringTasks) {
       const { _id, taskName, nextOccurrence, interval, unit } = recurringTask;
       await tasksRepository.insertTask({ taskName, dueDate: nextOccurrence });
-      
-      
-      await tasksRepository.updateNextOccurrence(_id, interval, unit, nextOccurrence)
 
+      await tasksRepository.updateNextOccurrence(
+        _id,
+        interval,
+        unit,
+        nextOccurrence,
+      );
     }
   } catch (error) {
     console.error("error al cargar tarea recurrente ", error);

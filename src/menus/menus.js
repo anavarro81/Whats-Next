@@ -122,24 +122,43 @@ export const runTaskOneByOneMenu = async (tasks) => {
 
   console.log(data);
 
-  return data
+  return data;
 };
 
 export const todayTaskMenu = async (todayTask) => {
-  const opcSalir = [{ name: "Salir", value: "exit" }];
+  const dayOptionsChoices = [
+    { name: "Solo mañana", value: "M" },
+    { name: "Solo la de la tarde", value: "T" },
+    { name: "Solo la de la noche", value: "N" },
+    { name: "Todas", value: "ALL" },
+    { name: "Salir", value: "EXIT" },
+  ];
 
-  console.table(todayTask, ["taskName", "timeBlock", "dueDate"]);
-
-  // '\b\b' `Tarea #${i + 1}:`, todayTask[i].name + '\n' + "Descripcion: " + todayTask[i].description
-
-  const data = await inquirer.prompt([
+  const viewOpc = await inquirer.prompt([
     {
       type: "rawlist",
       name: "opc",
-      message: "Selecciona salir para volver al menu principal",
-      choices: opcSalir,
+      message: "¿Qué tareas del dia quieres ver?",
+      choices: dayOptionsChoices,
     },
   ]);
 
-  return data.opc;
+  let filteredTasks = []
+
+  switch (viewOpc.opc) {
+    case "M":
+    case "T":  
+    case "N":
+      filteredTasks = todayTask.filter((task) => task.timeBlock == viewOpc.opc)      
+      break;
+    case "ALL":
+      filteredTasks = todayTask
+    default:
+      break;
+  }
+
+  console.table(filteredTasks, ["taskName", "timeBlock"]); 
+
+  
+  return viewOpc.opc
 };
