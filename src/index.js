@@ -2,9 +2,8 @@ import {
   createNewTask,
   runTasks,
   getTodayTask,
-  
+  loadRecurringTask,
 } from "./services/task.service.js";
-
 
 import { mainMenu, newTaskMenu } from "./menus/menus.js";
 import dotenv from "dotenv";
@@ -12,6 +11,8 @@ dotenv.config();
 
 const main = async () => {
   let opc = 0;
+
+  await loadRecurringTask();
 
   while (opc != 4) {
     let { opc } = await mainMenu();

@@ -1,11 +1,28 @@
 import * as tasksRepository from "../repository/task.repository.js";
 import daysjs from "dayjs";
+import { getDB } from "../bd.js";
 
 import {
   runTaskMenu,
   runTaskOneByOneMenu,
   todayTaskMenu,
 } from "../menus/menus.js";
+
+export const getOverDueTime = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  let endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
+  return { today, endOfDay };
+};
+
+export const connectToDB = async (bdName) => {
+  const db = await getDB();
+  const collection = db.collection(bdName);
+  return collection;
+};
 
 export const validatetaskData = (data) => {
   let validFormat = false;
@@ -14,7 +31,7 @@ export const validatetaskData = (data) => {
   const taskData = {
     taskName: "",
     timeBlock: "",
-    dueDate: "",
+    dueDate: null,
     recurring: false,
     interval: 0,
     unit: "",
@@ -80,7 +97,10 @@ export const createNewTask = async (data) => {
       return;
     }
 
-    console.log("insertar datos ", taskData);
+    // Si
+    if (!taskData.dueDate && recurringTask) {
+      taskData.dueDate = new Date();
+    }
 
     await tasksRepository.insertTask(taskData);
 
@@ -118,14 +138,14 @@ export const runTasks = async () => {
 
   const tasks = await getTasksToRun(order);
 
-  let opc = "";
+  
 
   if (tasks.length == 0) {
     console.error("No existen tareas");
     return;
   }
 
-  opc = await runTaskOneByOneMenu(tasks);
+  const {opc, postponeAmount}= await runTaskOneByOneMenu(tasks);
 
   let exit = "N";
 
@@ -150,7 +170,7 @@ export const runTasks = async () => {
         break;
 
       case "postpone":
-        await tasksRepository.update;
+        await tasksRepository.updateDueDate(tasks[0], postponeAmount);
         tasks.shift();
         exit = "S";
         break;
@@ -200,5 +220,40 @@ export const getTaskBylabel = async (label) => {
     }
   } catch (error) {
     console.error("Error al recuperar las tareas de la label ", error);
+  }
+};
+
+
+/* Recupera las tareas  recurrente con fecha anterior o igual a hoy */
+
+export const getRecurringTask = async () => {
+  try {
+    const recurringTasksCollection = await connectToDB("recurringTasks");
+    const { endOfDay } = getOverDueTime();
+    const recurringTasks = await recurringTasksCollection
+      .find({ nextOccurrence: { $lte: endOfDay } })
+      .toArray();
+    return recurringTasks;
+  } catch (error) {
+    console.error("error al obtener tareas recurrentes ", error);
+  }
+};
+
+/* Inserta en la tabla de tareas las tareas recurrentes que se tienen que realizar hoy */
+
+export const loadRecurringTask = async () => {
+  try {
+    const recurringTasks = await getRecurringTask();
+    for (const recurringTask of recurringTasks) {      
+      
+      const { _id, taskName, nextOccurrence, interval, unit } = recurringTask;
+      await tasksRepository.insertTask({ taskName, dueDate: nextOccurrence });
+      
+      
+      await tasksRepository.updateNextOccurrence(_id, interval, unit, nextOccurrence)
+
+    }
+  } catch (error) {
+    console.error("error al cargar tarea recurrente ", error);
   }
 };

@@ -1,6 +1,6 @@
-import { getDB } from "../bd.js";
-
 import * as tasksRepository from "../repository/task.repository.js";
+import { getDB } from "../bd.js";
+import daysjs from "dayjs";
 
 export const deleteTask = async (id) => {
   try {
@@ -8,7 +8,6 @@ export const deleteTask = async (id) => {
     await db.collection("tasks").deleteOne({ _id: id });
   } catch (error) {}
 };
-
 export const getTasks = async (order) => {
   const db = await getDB();
   const tasksCollection = db.collection("tasks");
@@ -75,10 +74,47 @@ export const getTaskBylabel = async (label) => {
   }
 };
 
-export const updateDueDate = async (postponeAmount) => {
+export const updateDueDate = async (task, postponeAmount) => {
   const db = await getDB();
   const tasksCollection = db.collection("tasks");
-  const task = await tasksCollection.updateOne();
+
+  const { _id, dueDate } = task;
+
+  let interval = 0;
+  let unit = "";
+
+  switch (postponeAmount) {
+    case "1day":
+      interval = 1;
+      unit = "day";
+      break;
+    case "2days":
+      interval = 2;
+      unit = "day";
+      break;
+    case "7days":
+      interval = 1;
+      unit = "week";
+      break;
+    case "1month":
+      interval = 1;
+      unit = "month";
+      break;
+    default:
+      break;
+  }
+
+  let nextOccurrence = daysjs(dueDate).add(interval, unit).toDate();
+
+  try {
+    const result = await tasksCollection.updateOne(
+      { _id: _id },
+      // { dueDate: nextOccurrence },
+      { $set: { dueDate: nextOccurrence } },
+    );
+  } catch (error) {
+    console.error('error al actualizar la tarea ', error)
+  }
 };
 
 export const insertTask = async (taskData) => {
@@ -92,7 +128,6 @@ export const insertTask = async (taskData) => {
   }
 };
 
-
 export const insertRecurringTask = async (taskData) => {
   try {
     const db = await getDB();
@@ -101,4 +136,25 @@ export const insertRecurringTask = async (taskData) => {
   } catch (error) {
     console.error("error al insertar tarea recurrente ", error);
   }
-};  
+};
+
+export const updateNextOccurrence = async (
+  id,
+  interval,
+  unit,
+  nextOccurrence,
+) => {
+  try {
+    const db = await getDB();
+    const tasksCollection = db.collection("recurringTasks");
+
+    let nextO = daysjs(nextOccurrence).add(interval, unit).toDate();
+
+    const result = await tasksCollection.updateOne(
+      { _id: id },
+      { $set: { nextOccurrence: nextO } },
+    );
+  } catch (error) {
+    console.log("Error al actualizar la tarea recurrente ", error);
+  }
+};

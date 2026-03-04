@@ -15,10 +15,10 @@ const runTaskQuestions = [
 ];
 
 const postponeOptionsChoices = [
-  { name: "Mañana (24h)", value: 24 },
-  { name: "Pasado mañana (48h)", value: 48 },
-  { name: "Próxima semana", value: 7 },
-  { name: "Próxima mes", value: 1 },
+  { name: "Mañana (24h)", value: "1day" },
+  { name: "Pasado mañana (48h)", value: "2days" },
+  { name: "Próxima semana", value: "7days" },
+  { name: "Próxima mes", value: "1month" },
 ];
 
 export const mainMenu = async () => {
@@ -122,7 +122,7 @@ export const runTaskOneByOneMenu = async (tasks) => {
 
   console.log(data);
 
-  return data.opc;
+  return data
 };
 
 export const todayTaskMenu = async (todayTask) => {
