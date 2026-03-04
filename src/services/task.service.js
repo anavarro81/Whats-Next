@@ -45,11 +45,14 @@ export const validatetaskData = (data) => {
   }
 
   // Extraigo el bloque de tiempo @M (mañana), @T(Tarde) o @N (Noche)
+  // Por defecto, si no se indica nada será de mañana. 
+  
   const timeBlock = data.name.match(/@([MTN])/);
 
-  if (timeBlock) {
-    console.log("timeBlock: ", timeBlock[1]);
+  if (timeBlock) {    
     taskData.timeBlock = timeBlock[1];
+  } else {    
+    taskData.timeBlock = "M"
   }
 
   // Extraigo la fecha (si existe)
