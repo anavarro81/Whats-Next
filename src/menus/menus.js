@@ -2,23 +2,21 @@ import inquirer from "inquirer";
 
 const mainMenuChoices = [
   { name: "Alta de tarea", value: 1 },
-  { name: "Ejecutar tareas", value: 2 },
+  { name: "Gestionar tareas", value: 2 },
   { name: "Tareas de hoy", value: 3 },
   { name: "Salir", value: 4 },
 ];
 
-const runTaskQuestions = [
-  { name: "Random", value: "random" },
-  { name: "Descending", value: "desc" },
-  { name: "Ascending", value: "asc" },
-  { name: "Tareas de hoy", value: "today" },
+const taskManagerMenuChoices = [
+  { name: "Borrar tarea", value: "del" },
+  { name: "Actualizar tarea", value: "upd" },
+  { name: "Salir", value: "exit" },
 ];
 
-const postponeOptionsChoices = [
-  { name: "Mañana (24h)", value: "1day" },
-  { name: "Pasado mañana (48h)", value: "2days" },
-  { name: "Próxima semana", value: "7days" },
-  { name: "Próxima mes", value: "1month" },
+const runTaskQuestions = [
+  { name: "Todas", value: "ALL" },
+  { name: "Tareas del dia", value: "TODAY" },
+  { name: "Gestiones", value: "Gestiones" },
 ];
 
 export const mainMenu = async () => {
@@ -34,11 +32,24 @@ export const mainMenu = async () => {
   return data;
 };
 
+export const taskManagerMenu = async () => {
+  const data = await inquirer.prompt([
+    {
+      type: "rawlist",
+      name: "opc",
+      message: "¿Que quieres hacer con la tarea?",
+      choices: taskManagerMenuChoices,
+    },
+  ]);
+
+  return data.opc;
+};
+
 export const runTaskMenu = async () => {
   const data = inquirer.prompt({
     type: "rawlist",
     name: "order",
-    message: "¿En qué orden quieres mostrar las taras",
+    message: "¿Que tareas quieres mostrar? ",
     choices: runTaskQuestions,
   });
 
@@ -85,46 +96,6 @@ export const newTaskMenu = async () => {
   return task;
 };
 
-export const runTaskOneByOneMenu = async (tasks) => {
-  const data = await inquirer.prompt([
-    {
-      type: "rawlist",
-      name: "opc",
-      message: `¿Has completado la tarea: ${tasks[0].taskName}`,
-      choices: [
-        {
-          name: `Sí, la he completado. Quiero otra`,
-          value: "completedNext",
-        },
-        {
-          name: "Sí, la he completado. Quiero salir`,",
-          value: "completedExit",
-        },
-        {
-          name: "No, la quiero postponer`,",
-          value: "postpone",
-        },
-        {
-          name: "Salir`,",
-          value: "exit",
-        },
-      ],
-    },
-
-    {
-      type: "rawlist",
-      name: "postponeAmount",
-      message: "¿Cuánto tiempo deseas posponerla?",
-      choices: postponeOptionsChoices,
-      when: (answers) => answers.opc === "postpone",
-    },
-  ]);
-
-  console.log(data);
-
-  return data;
-};
-
 export const todayTaskMenu = async (todayTask) => {
   const dayOptionsChoices = [
     { name: "Solo mañana", value: "M" },
@@ -143,22 +114,35 @@ export const todayTaskMenu = async (todayTask) => {
     },
   ]);
 
-  let filteredTasks = []
+  let filteredTasks = [];
 
   switch (viewOpc.opc) {
     case "M":
-    case "T":  
+    case "T":
     case "N":
-      filteredTasks = todayTask.filter((task) => task.timeBlock == viewOpc.opc)      
+      filteredTasks = todayTask.filter((task) => task.timeBlock == viewOpc.opc);
       break;
     case "ALL":
-      filteredTasks = todayTask
+      filteredTasks = todayTask;
     default:
       break;
   }
 
-  console.table(filteredTasks, ["taskName", "timeBlock"]); 
+  console.table(filteredTasks, ["taskName", "timeBlock"]);
 
-  
-  return viewOpc.opc
+  return viewOpc.opc;
+};
+
+export const askForIndex = async () => {
+  const data = await inquirer.prompt([
+    {
+      type: "input",
+      name: "index",
+      message: "Indicar el indice de la tarea",
+    },
+  ]);
+
+  console.log("El indice es ", data.index);
+
+  return parseInt(data.index);
 };

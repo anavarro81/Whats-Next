@@ -4,8 +4,9 @@ import { getDB } from "../bd.js";
 
 import {
   runTaskMenu,
-  runTaskOneByOneMenu,
   todayTaskMenu,
+  askForIndex,
+  taskManagerMenu,
 } from "../menus/menus.js";
 
 export const getOverDueTime = () => {
@@ -45,14 +46,14 @@ export const validatetaskData = (data) => {
   }
 
   // Extraigo el bloque de tiempo @M (mañana), @T(Tarde) o @N (Noche)
-  // Por defecto, si no se indica nada será de mañana. 
-  
+  // Por defecto, si no se indica nada será de mañana.
+
   const timeBlock = data.name.match(/@([MTN])/);
 
-  if (timeBlock) {    
+  if (timeBlock) {
     taskData.timeBlock = timeBlock[1];
-  } else {    
-    taskData.timeBlock = "M"
+  } else {
+    taskData.timeBlock = "M";
   }
 
   // Extraigo la fecha (si existe)
@@ -143,38 +144,26 @@ export const runTasks = async () => {
     return;
   }
 
-  const { opc, postponeAmount } = await runTaskOneByOneMenu(tasks);
+  console.table(tasks, ["taskName", "timeBlock", "dueDate"]);
+
+  console.log(tasks);
+
+  let opc = await taskManagerMenu();
 
   let exit = "N";
 
   while (exit !== "S") {
     switch (opc) {
-      case "completedNext":
-        await tasksRepository.deleteTask(tasks[0]._id);
-        tasks.shift();
-
-        if (tasks.length > 0) {
-          opc = await runTaskOneByOneMenu(tasks);
-        } else {
-          console.log("No quedan tareas");
-          exit = "S";
+      case "del":
+      case "upd":
+        const index = await askForIndex();
+        if (opc == "del") {
+          
+          const result = await tasksRepository.deleteTask(tasks[index]._id);
+          console.log("Tarea borrada correctamente");
         }
-        break;
-
-      case "completedExit":
-        await tasksRepository.deleteTask(tasks[0]._id);
-        tasks.shift();
-        exit = "S";
-        break;
-
-      case "postpone":
-        await tasksRepository.updateDueDate(tasks[0], postponeAmount);
-        tasks.shift();
-        exit = "S";
-        break;
-
+      
       default:
-        // Esto maneja cualquier otro valor de 'opc' (equivalente al último else)
         exit = "S";
         break;
     }

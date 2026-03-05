@@ -13,25 +13,10 @@ export const getTasks = async (order) => {
   const tasksCollection = db.collection("tasks");
   let task = "";
   switch (order) {
-    case "random":
-      task = await tasksCollection
-        .aggregate([{ $sample: { size: 10 } }])
-        .toArray();
+    case "ALL":
+      task = await tasksCollection.find({}).toArray()
       return task;
-    case "desc":
-      task = await tasksCollection
-        .find({ dueDate: { $exists: true } })
-        .sort({ dueDate: -1 })
-        .toArray();
-
-      return task;
-
-    case "asc":
-      task = await tasksCollection
-        .find({ dueDate: { $exists: true } })
-        .sort({ dueDate: 1 })
-        .toArray();
-    case "today":
+    case "TODAY":
       task = await tasksRepository.getTodayTasks();
       return task;
     default:
